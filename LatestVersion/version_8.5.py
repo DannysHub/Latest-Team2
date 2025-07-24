@@ -176,27 +176,31 @@ def judge(player, opp):
 # 弹窗：模式选择
 # ----------------------------------------------------------------------------
 def popup_mode_selection(title="Mode Selection"):
-    opts = ["Local","Host","Client"]
+    opts = ["Local", "Host", "Client", "Template"]  # ✅ 增加 Template
     idx = 0
     cv2.namedWindow(title)
     while True:
-        frm = np.zeros((300,600,3),dtype="uint8")
-        cv2.putText(frm,"Select Mode:",(30,40),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,0),2)
-        for i,opt in enumerate(opts):
-            col = (0,255,255) if i==idx else (255,255,255)
-            prefix = "> " if i==idx else "  "
-            cv2.putText(frm,prefix+opt,(50,100+i*60),cv2.FONT_HERSHEY_SIMPLEX,0.8,col,2)
-        cv2.putText(frm,"W/S: move   Enter: select   ESC: quit",(30,280),
-                    cv2.FONT_HERSHEY_SIMPLEX,0.5,(180,180,180),1)
-        cv2.imshow(title,frm)
-        k = cv2.waitKey(100)&0xFF
-        if k in (ord('w'),ord('W')):   idx=(idx-1)%3
-        if k in (ord('s'),ord('S')):   idx=(idx+1)%3
-        if k in (13,10):
+        frm = np.zeros((360, 600, 3), dtype="uint8")  # 高度调大一点
+        cv2.putText(frm, "Select Mode:", (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+        for i, opt in enumerate(opts):
+            col = (0, 255, 255) if i == idx else (255, 255, 255)
+            prefix = "> " if i == idx else "  "
+            cv2.putText(frm, prefix + opt, (50, 100 + i * 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, col, 2)
+        cv2.putText(frm, "W/S: move   Enter: select   ESC: quit", (30, 340),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (180, 180, 180), 1)
+        cv2.imshow(title, frm)
+        k = cv2.waitKey(100) & 0xFF
+        if k in (ord('w'), ord('W')):
+            idx = (idx - 1) % 4
+        if k in (ord('s'), ord('S')):
+            idx = (idx + 1) % 4
+        if k in (13, 10):  # ENTER
             cv2.destroyWindow(title)
-            return idx+1    # 1=Local,2=Host,3=Client
-        if k==27:
-            cv2.destroyAllWindows(); sys.exit(0)
+            return idx + 1  # 返回 1=Local, 2=Host, 3=Client, 4=Template
+        if k == 27:
+            cv2.destroyAllWindows()
+            sys.exit(0)
+
 
 # ----------------------------------------------------------------------------
 # Host 等待连接弹窗 (B 返回 / ESC 退出)
@@ -425,6 +429,58 @@ def get_local_ip():
     except:
         return "127.0.0.1"
 
+def run_template_collection_window():
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        print("Cannot open camera"); return
+
+    hands = mp.solutions.hands.Hands(
+        max_num_hands=1,
+        min_detection_confidence=0.7,
+        min_tracking_confidence=0.5
+    )
+
+    cv2.namedWindow("Template Collector")
+    info = "Press R/P/S to save rock/paper/scissors   ESC: quit"
+
+    while True:
+        ret, frame = cap.read()
+        frame = cv2.flip(frame, 1)
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        res = hands.process(rgb)
+
+        if res.multi_hand_landmarks:
+            lm = res.multi_hand_landmarks[0].landmark
+            mp.solutions.drawing_utils.draw_landmarks(
+                frame, res.multi_hand_landmarks[0], mp.solutions.hands.HAND_CONNECTIONS
+            )
+            cv2.putText(frame, info, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+
+            k = cv2.waitKey(1) & 0xFF
+            if k in (ord('r'), ord('R')):
+                gesture_templates["fist"] = {str(i): normalize_landmarks(lm)[i] for i in FINGERTIPS}
+                save_templates(gesture_templates)
+                print("✅ Rock (fist) template saved")
+            elif k in (ord('p'), ord('P')):
+                gesture_templates["open"] = {str(i): normalize_landmarks(lm)[i] for i in FINGERTIPS}
+                save_templates(gesture_templates)
+                print("✅ Paper (open) template saved")
+            elif k in (ord('s'), ord('S')):
+                gesture_templates["scissors"] = {str(i): normalize_landmarks(lm)[i] for i in FINGERTIPS}
+                save_templates(gesture_templates)
+                print("✅ Scissors template saved")
+            elif k == 27:
+                break
+        else:
+            cv2.putText(frame, "Show one hand", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+        cv2.imshow("Template Collector", frame)
+
+    cap.release()
+    hands.close()
+    cv2.destroyAllWindows()
+
+
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 # 主流程
@@ -442,6 +498,10 @@ if __name__ == "__main__":
             sock = setup_client()
             if sock is None: continue
             is_host, network = False, True
+        elif mode == 4:
+            run_template_collection_window()
+            continue  # 回到模式选择
+
         # 初始化摄像头、Mediapipe、分数等，随后进入回合循环
         # ... (其余流程保持不变) ...
         # 摄像头 & Mediapipe Hands
