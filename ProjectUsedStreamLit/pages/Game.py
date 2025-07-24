@@ -116,7 +116,7 @@ with col_video:
     subcol1, subcol2 = st.columns([4, 1])
     subcol1.subheader(f"Round {backend.round_id or 1}")
     gesture_slot = subcol1.empty()
-    gesture_slot.markdown("🔍 completion: 0.00")
+    gesture_slot.markdown("Completion: 0.00")
     timer_slot = subcol2.empty()
 
     btn_col1, btn_col2 = st.columns([3, 1], gap="medium")
@@ -147,10 +147,10 @@ with col_video:
             frame_slot.image(img, use_container_width=True)
 
             current = data.get("total") or 0.0
-            gesture_slot.markdown(f"🔍 completion: {current:.2f}")
+            gesture_slot.markdown(f"Completion: {current:.2f}")
 
             remaining = (num_frames - i) * interval
-            timer_slot.markdown(f"⏱️ Time remaining: **{remaining:.1f}s**")
+            timer_slot.markdown(f"Remaining: **{remaining:.1f}s**")
 
             if current > max_total:
                 max_total = current

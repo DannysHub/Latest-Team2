@@ -173,10 +173,27 @@ class RPSBackend:
         # 初始化数据
         data = {"frame": frame, "gesture": None, "shape": 0.0, "open": 0.0, "total": None}
         if res.multi_hand_landmarks:
-            lm = res.multi_hand_landmarks[0].landmark
+            # 加粗骨架线 & 更亮的颜色（红色线 + 红点）
+            drawing_spec = mp.solutions.drawing_utils.DrawingSpec(
+                color=(0, 0, 255),     # 红色线条 (BGR 格式)
+                thickness=3,           # 线条粗细
+                circle_radius=4        # 关键点大小
+            )
+            mp.solutions.drawing_utils.draw_landmarks(
+                frame,
+                res.multi_hand_landmarks[0],
+                mp.solutions.hands.HAND_CONNECTIONS,
+                drawing_spec,
+                drawing_spec
+            )
+
             # 识别手势
-            g = classify_rps(lm)
+            lm = res.multi_hand_landmarks[0].landmark
+            g  = classify_rps(lm)
+
             data["gesture"] = g
+            cv2.putText(frame, f"Gesture: {g}", (10, 30), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.2, (200, 50, 50), 2)
             # 保存规范化 landmarks 以备采集模板
             self.last_norm = normalize_landmarks(lm)
             # 计算完成度

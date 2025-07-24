@@ -67,6 +67,8 @@ def append_csv(time, mode, gesture, best_completion):
     with open(CSV_FILE, 'a', newline='') as f:
         csv.writer(f).writerow([time, mode, gesture, f"{best_completion:.2f}"])
 
+
+
 # ==== 手势处理 辅助函数 ====
 
 def palm_center_and_width(lm) -> Tuple[float,float,float]:
@@ -179,16 +181,33 @@ class RPSBackend:
         ret, frame = self.cap.read()
         if not ret:
             raise RuntimeError("Camera fail")
-        frame = cv2.flip(frame,1)
+        frame = cv2.flip(frame, 1)
         rgb   = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         res   = self.hands.process(rgb)
 
         out = {"frame": frame, "gesture": None, "shape": 0.0, "open": 0.0, "total": None}
 
         if res.multi_hand_landmarks:
+            # 加粗骨架线 & 更亮的颜色（红色线 + 红点）
+            drawing_spec = mp.solutions.drawing_utils.DrawingSpec(
+                color=(0, 0, 255),     # 红色线条 (BGR 格式)
+                thickness=3,           # 线条粗细
+                circle_radius=4        # 关键点大小
+            )
+            mp.solutions.drawing_utils.draw_landmarks(
+                frame,
+                res.multi_hand_landmarks[0],
+                mp.solutions.hands.HAND_CONNECTIONS,
+                drawing_spec,
+                drawing_spec
+            )
+
+            # 识别手势
             lm = res.multi_hand_landmarks[0].landmark
             g  = classify_rps(lm)
             out["gesture"] = g
+            cv2.putText(frame, f"Gesture: {g}", (10, 30), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
 
             # 如果识别到的是未知手势，就直接返回，不做后续模板匹配
             mapping = {"rock":"fist", "paper":"open", "scissors":"scissors"}
@@ -213,6 +232,7 @@ class RPSBackend:
             out.update(shape=shp, open=op, total=tot)
 
         return out
+
 
     def ai_choice(self, player: str) -> str:
         # Assist 模式
