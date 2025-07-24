@@ -203,23 +203,23 @@ def setup_host():
         srv.bind((HOST_LISTEN, PORT))
         srv.listen(1)
         ip = get_local_ip()
-        print(f"[Host] 等待客户端连接... (IP: {ip}:{PORT})")
+        print(f"[Host] Waiting of Connect... (IP: {ip}:{PORT})")
         conn, addr = srv.accept()
-        print(f"[Host] 客户端已连接: {addr}")
+        print(f"[Host] Connected: {addr}")
         return conn
     except Exception as e:
-        print("[Host] 启动失败:", e)
+        print("[Host] Failed:", e)
         return None
 
 def setup_client():
-    ip = input("输入主机IP: ").strip()
+    ip = input("Enter Host IP: ").strip()
     try:
         cli = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         cli.connect((ip, PORT))
-        print("[Client] 连接成功!")
+        print("[Client] Connected!")
         return cli
     except Exception as e:
-        print("[Client] 连接失败:", e)
+        print("[Client] Failed:", e)
         return None
 
 def handshake(sock, is_host, timeout=5.0):
@@ -365,18 +365,18 @@ def highmode_ai_choice(player_gesture: str, ai_win_prob: float) -> str:
 # =============================================================================
 def main():
     print("==== 模式选择 / Mode Select ====")
-    print("1) 本地 vs AI")
-    print("2) 联机 (Host)")
-    print("3) 联机 (Client)")
+    print("1) local (Single Player)")
+    print("2) online (Host)")
+    print("3) online (Client)")
     mode=input(">>> ").strip()
     remote_mode=False; net_sock=None; is_host=False
     if mode=='2': net_sock=setup_host(); is_host=net_sock is not None; remote_mode=is_host
     elif mode=='3': net_sock=setup_client(); is_host=False; remote_mode=net_sock is not None
-    else: print("进入单人模式")
-    if mode in ('2','3') and not remote_mode: print("联机失败, 本地模式继续")
+    else: print("Enter single-player mode")
+    if mode in ('2','3') and not remote_mode: print("Online connection failed, local mode continues")
     init_csv()
     cap=cv2.VideoCapture(0)
-    if not cap.isOpened(): print("无法打开摄像头"); return
+    if not cap.isOpened(): print("Can not open camera"); return
     wins=losses=draws=0; score=0; round_id=0
     assist_active=False; assist_prob=ASSIST_AI_WIN_PROB_INITIAL
     high_active=False; high_prob=HIGH_AI_WIN_PROB_INITIAL
@@ -439,7 +439,7 @@ def main():
                         norm_cap=normalize_landmarks(lm_list)
                         gesture_templates[base]={str(i):norm_cap[i] for i in FINGERTIPS}
                         save_templates(gesture_templates)
-                        print(f"[模板更新] {base}")
+                        print(f"[Model update] {base}")
                     # 计算完成度
                     norm=normalize_landmarks(lm_list)
                     if player_gesture=='rock': base='fist'
@@ -463,21 +463,21 @@ def main():
                         cv2.putText(frame,f"{tip}:{dval:.3f}",(20,y0),cv2.FONT_HERSHEY_SIMPLEX,0.45,color,1)
                         y0+=18
                     if player_gesture=='scissors':
-                        cv2.putText(frame,f"Shape:{shape:.1f}% Open:{open_pct:.1f}%",(20,140),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,200,255),2)
-                        cv2.putText(frame,f"ScissScore:{total_disp:.1f}% (Best:{best_total:.1f}%)",(20,115),cv2.FONT_HERSHEY_SIMPLEX,0.55,(255,255,255),2)
+                        cv2.putText(frame,f"Shape:{shape:.1f}% Open:{open_pct:.1f}%",(20,140),cv2.FONT_HERSHEY_SIMPLEX,0.8,(0,200,255),2)
+                        cv2.putText(frame,f"ScissScore:{total_disp:.1f}% (Best:{best_total:.1f}%)",(20,115),cv2.FONT_HERSHEY_SIMPLEX,0.85,(255,255,255),2)
                     else:
-                        cv2.putText(frame,f"Shape:{shape:.1f}% Open:{open_pct:.1f}% Clo:{100-open_pct:.1f}%",(20,140),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,200,255),2)
-                        cv2.putText(frame,f"Total:{total_disp:.1f}% (Best:{best_total:.1f}%)",(20,115),cv2.FONT_HERSHEY_SIMPLEX,0.55,(255,255,255),2)
+                        cv2.putText(frame,f"Shape:{shape:.1f}% Open:{open_pct:.1f}% Clo:{100-open_pct:.1f}%",(20,140),cv2.FONT_HERSHEY_SIMPLEX,0.8,(0,200,255),2)
+                        cv2.putText(frame,f"Total:{total_disp:.1f}% (Best:{best_total:.1f}%)",(20,115),cv2.FONT_HERSHEY_SIMPLEX,0.85,(255,255,255),2)
                     mp.solutions.drawing_utils.draw_landmarks(frame, res.multi_hand_landmarks[0], mp_hands.HAND_CONNECTIONS)
                 else:
-                    cv2.putText(frame,"Completion: N/A",(20,140),cv2.FONT_HERSHEY_SIMPLEX,0.55,(200,200,200),2)
+                    cv2.putText(frame,"Completion: N/A",(20,140),cv2.FONT_HERSHEY_SIMPLEX,0.85,(200,200,200),2)
                 remain=CAPTURE_SECONDS-int(time.time()-capture_start)
-                cv2.putText(frame,f"Show ({remain})",(20,60),cv2.FONT_HERSHEY_SIMPLEX,0.9,(0,255,0),2)
-                cv2.putText(frame,f"Gesture:{player_gesture}",(20,35),cv2.FONT_HERSHEY_SIMPLEX,0.7,(255,255,0),2)
-                footer="[t]模板  ESC退出"
+                cv2.putText(frame,f"Show ({remain})",(20,60),cv2.FONT_HERSHEY_SIMPLEX,1.1,(0,255,0),2)
+                cv2.putText(frame,f"Gesture:{player_gesture}",(20,35),cv2.FONT_HERSHEY_SIMPLEX,0.9,(255,255,0),2)
+                footer="[t]Model  ESC exist"
                 if high_active: footer+=f" | High p={high_prob:.2f}"
                 elif assist_active: footer+=f" | Assist p={assist_prob:.2f}"
-                cv2.putText(frame,footer,(240,470),cv2.FONT_HERSHEY_SIMPLEX,0.5,(180,180,180),1)
+                cv2.putText(frame,footer,(240,470),cv2.FONT_HERSHEY_SIMPLEX,1,(80, 50, 200),2)
                 cv2.imshow(WINDOW_NAME,frame)
                 if cv2.waitKey(1)&0xFF==27: return
             # 对手手势
