@@ -31,3 +31,239 @@ HandRehab-RPS 是一款基于计算机视觉的严肃游戏，将经典的石头
 3. 远程对战模块 Live multiplayer 
 4. 数据记录与分析模块 Data Logging & Metrics 
 5. 数据同步以及临床记录 Sync & Clinician Dashboard
+
+
+## Get Start
+
+# Rock Paper Scissors (Hand Gesture Recognition Game In Terminal)
+
+This is an interactive Rock-Paper-Scissors game using hand gesture recognition powered by OpenCV and MediaPipe. It supports local play, online multiplayer via socket, adaptive AI difficulty, gesture template training, and scoring metrics based on gesture shape and openness.
+
+---
+
+## ✅ Features
+
+- 🤖 Local vs AI mode with adaptive difficulty (Assist / Normal / High)
+- 🌐 Multiplayer mode (Host or Client with IP input)
+- 🖐 Hand gesture recognition using MediaPipe (OpenCV visualization)
+- 🎯 Shape / Open / Total score metrics for gesture quality
+- 🧠 't' to train gesture templates during play
+- 📈 CSV logs for all game rounds
+- 📷 Template training mode for custom rock/paper/scissors
+
+---
+
+## 🚀 Getting Started
+
+### 1. Install Python (Recommended: 3.8 ~ 3.11)
+Check with:
+```bash
+python --version
+```
+
+### 2. Create and Activate Virtual Environment (optional but recommended)
+```bash
+python -m venv venv
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate   # Windows
+```
+
+### 3. Install Dependencies
+```bash
+pip install opencv-python mediapipe numpy
+```
+
+---
+
+## 📂 Required Files
+
+Ensure these files are in the **same directory**:
+
+- `version_8.5.py` (main program)
+- `gesture_templates.json` (auto-created for gesture data)
+- `rps_open_fist_completion.csv` (auto-created for game logs)
+
+---
+
+## 💻 Running the Program
+
+```bash
+python version_8.5.py
+```
+
+### You will see a black pop-up window for mode selection:
+
+| Key     | Function                        |
+|---------|---------------------------------|
+| W / S   | Navigate options                |
+| ENTER   | Select                          |
+| ESC     | Quit program                    |
+
+---
+
+## 🎮 Modes
+
+| Mode     | Description                                      |
+|----------|--------------------------------------------------|
+| Local    | Play against AI locally                          |
+| Host     | Host an online match (displays your IP address)  |
+| Client   | Join a match by entering Host's IP               |
+| Template | Enter template collection mode                   |
+
+---
+
+## ✋ Template Mode Instructions
+
+- Show one hand to camera
+- Press keys to save gesture templates:
+  - `R` → Rock (fist)
+  - `P` → Paper (open)
+  - `S` → Scissors
+- Press `ESC` to exit
+
+Templates are saved to `gesture_templates.json`.
+
+---
+
+## 🌐 Multiplayer Instructions
+
+1. One player selects **Host**, waits for connection (IP shown)
+2. Other player selects **Client**, inputs host IP
+3. Game syncs using READY / ACK handshake
+4. Proceed to play synchronously
+
+Make sure port `65432` is open on both sides and devices are reachable.
+
+---
+
+## 📊 Scoring Metrics
+
+- **Shape %**: similarity to template keypoints
+- **Open %**: openness of hand
+- **Total %**: combination of both based on gesture type
+
+---
+
+## 🧪 Testing Suggestions
+
+1. Start in `Template` mode and collect gesture templates
+2. Try `Local` mode to test recognition
+3. Connect two devices via `Host`/`Client` for multiplayer
+4. Review `rps_open_fist_completion.csv` for scores and logs
+
+---
+
+## ❓ Troubleshooting
+
+| Issue             | Cause / Fix                                        |
+|------------------|----------------------------------------------------|
+| Camera not opening | Check permissions / Close other camera apps       |
+| Connection failed | Use correct IP / Same network / Port not blocked  |
+| No pop-up shown   | Make sure you're in a GUI environment              |
+
+---
+
+## 📜 License
+
+This project is provided strictly for educational and demonstration purposes.
+All rights reserved. Modification, redistribution, or commercial use is not permitted without explicit permission from the author.
+
+
+# ✋ Rock-Paper-Scissors (Streamlit Version)
+
+This is a web-based hand gesture recognition RPS (Rock-Paper-Scissors) game built with **Streamlit + OpenCV + MediaPipe**. It supports:
+
+- Local vs AI gameplay
+- Host / Client multiplayer via LAN
+- Real-time gesture scoring: Shape, Open, and Total completion
+- Gesture template collection
+- Progress tracking with charts
+
+---
+
+## ✅ Features
+
+- 🖐 Hand gesture detection using MediaPipe
+- 🤖 Adaptive AI difficulty (Assist / High)
+- 🌐 Multiplayer mode with socket networking
+- 📈 Score chart and daily performance logs
+- 📄 CSV logging: gesture, score, mode, and timestamps
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository & Navigate
+```bash
+git clone <your-repo-url>
+cd <project-folder>
+```
+
+### 2. Create Virtual Environment (Optional)
+```bash
+python -m venv venv
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate   # Windows
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 💻 Running the App
+
+```bash
+streamlit run Home.py
+```
+
+- Navigate to `Game Mode` to play.
+- Click `Game Mode` to enter the gesture game.
+- Choose **Local / Host / Client**, and click `Connect/Start`.
+
+---
+
+## ✋ Gesture Template
+
+- Templates help score your gestures.
+- If `gesture_templates.json` is empty, complete scores may be lower.
+- To customize templates, switch to Template Mode (if implemented), or press `t` in OpenCV versions.
+
+---
+
+## 🎮 Modes
+
+| Mode     | Description                                      |
+|----------|--------------------------------------------------|
+| Local    | Play vs AI on your machine                       |
+| Host     | Host a match and wait for Client (show IP)       |
+| Client   | Connect to Host's IP to play                     |
+
+---
+
+## 📊 Score Chart
+
+From the homepage:
+
+- View average best-completion score per day.
+- Filtered by gesture: rock, paper, scissors.
+- Data is read from `rps_open_fist_completion.csv`.
+
+---
+
+## ❗ Important Notes
+
+- Your webcam is required.
+- Use in a GUI environment (no headless server).
+- CSV and JSON files are auto-created:
+  - `gesture_templates.json`
+  - `rps_open_fist_completion.csv`
+
+---
+
+## 📜 License
+
+This project is provided for educational and demonstration purposes only.  
+All rights reserved. Modification, redistribution, or commercial use is not permitted without explicit permission from the author.
